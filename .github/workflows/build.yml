@@ -7,3 +7,24 @@ on:
 jobs:
   build:
     uses: zmkfirmware/zmk/.github/workflows/build-user-config.yml@main
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Download firmware artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: firmware
+          merge-multiple: true
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: firmware-${{ github.run_number }}
+          name: Firmware Build ${{ github.run_number }}
+          body: |
+            ZMK firmware build from commit ${{ github.sha }}
+          files: firmware/**/*.uf2
